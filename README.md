@@ -1,6 +1,6 @@
-# 📈 Multi-Pattern Candlestick-Based Buy/Sell Signal Indicator for TradingView
+# 📈 Multi-Pattern Candlestick-Based Up/Down Signal Indicator for TradingView
 
-This TradingView Pine Script project provides a robust **multi-pattern candlestick indicator** that dynamically identifies potential **buy/sell signals**, **entry breakout points**, and **stop-loss triggers** based on well-known candlestick reversal patterns. It features two independent signal systems with clear visual cues (including custom labels like _"Buy"_ and _"Sell"_ for intuitive trade triggers).
+This TradingView Pine Script project provides a robust **multi-pattern candlestick indicator** that dynamically identifies potential **up/down signals**, **entry breakout points**, and **stop-loss triggers** based on well-known candlestick reversal patterns. It features two independent signal systems with clear visual cues (including custom labels like _"Up"_ and _"Down"_ for intuitive trade triggers).
 
 ---
 
@@ -11,7 +11,7 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
   - Bearish: Engulfing, Harami, Inverted Hammer, Dark Cloud Cover
 
 - 🧠 **Dual Indicator Systems**:
-  - `Indicator 1`: Breakout-based confirmation with conditionally plotted buy/sell markers.
+  - `Indicator 1`: Breakout-based confirmation with conditionally plotted up/down markers.
   - `Indicator 2`: Lighter version with instant signal plotting based on pattern detection.
 
 - 🔔 **Dynamic Breakout & Stop-Loss Lines**:
@@ -19,7 +19,7 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 
 - 🟢🔴 **Signal Visuals**:
   - 'B' for bullish entries, 'S' for bearish entries.
-  - "Buy" and "Sell" labels on breakout confirmation.
+  - "Up" and "Down" labels on breakout confirmation.
   - 'SL' label marks stop-loss triggers visually.
 
 - ⏰ **3 PM Exit Marker (Optional)**:
@@ -31,14 +31,14 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 
 ### Signal Logic
 
-- **Up Move Logic** (Buy):
+- **Up Move Logic**:
   - Pattern like Bullish Engulfing forms near PD Low/Close or Current Day Low.
-  - Breaks above pattern high triggers `"Buy"` label and long bias.
+  - Breaks above pattern high triggers an `"Up"` label and bullish bias.
   - Stop-loss placed slightly below pattern low.
 
-- **Down Move Logic** (Sell):
+- **Down Move Logic**:
   - Pattern like Bearish Engulfing forms near PD High/Close or Current Day High.
-  - Breaks below pattern low triggers `"Sell"` label and short bias.
+  - Breaks below pattern low triggers a `"Down"` label and bearish bias.
   - Stop-loss placed slightly above pattern high.
 
 ### Dual Indicator Mode
@@ -51,9 +51,7 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 
 ## 📷 Screenshot
 
-![Signal Preview](https://raw.githubusercontent.com/Avin-Chaudhary/YourRepoName/main/screenshots/signal-preview.png)
-
-> _Replace the above URL with the actual screenshot path after uploading to your repo._
+![Signal Preview](https://github.com/Avin-Chaudhary/Trading-Indicator/blob/main/indicator%20screenshot.png)
 
 ---
 
