@@ -1,0 +1,1084 @@
+//@version=6
+indicator("indicator-12", overlay=true) 
+
+
+
+// Function to identify bullish engulfing pattern 
+isBullishEngulfing(open, close, low, high) => 
+    (open[1] > close[1] and close > open and close >= open[1] and (open<=close[1] and open>=(close[1]-5.0)) and close - open > open[1] - close[1] ) 
+
+
+// Function to identify bearish engulfing pattern 
+isBearishEngulfing(open, close, low, high) => 
+    (close[1] > open[1] and open > close and (open>=close[1] and open<=(close[1]+5.0)) and open[1] >= close and open - close > close[1] - open[1] ) 
+
+
+// Function to identify hammer pattern 
+isHammer(open, close, low, high) =>
+    bodySize = math.abs(close - open)
+    lowerWick = open < close ? (open - low) : (close - low)
+    upperWick = high - math.max(open, close)
+    
+    (lowerWick >= 2 * bodySize) and (upperWick < bodySize)
+
+
+// Function to identify inverted hammer pattern 
+isInvertedHammer(open, close, low, high) => 
+    bodySize = math.abs(close - open)
+    lowerWick = open < close ? (open - low) : (close - low)
+    upperWick = high - math.max(open, close)
+
+    (upperWick >= 2 * bodySize) and (lowerWick < bodySize)
+
+
+// Function to identify bullish harami pattern 
+isBullishHarami(open, close, low, high) => 
+    (open[1] > close[1] and close > open and close <= open[1] and (open<=(close[1]+5.0) and open>=close[1]) and close - open < open[1] - close[1] )
+
+
+// Function to identify bearish harami pattern 
+isBearishHarami(open, close, low, high) => 
+    (close[1] > open[1] and open > close and (open<=close[1] and open>=(close[1]-5.0)) and open[1] <= close and open - close < close[1] - open[1] ) 
+
+isPiercingPattern(open,close,low,high) =>
+    (open[1]>close[1] and close>open and close > (close[1]+((open[1]-close[1])/2)) and open<close[1]-0.5 and close<open[1])
+
+isDarkCloudCover(open,close,low,high) =>
+    (close[1]>open[1] and open>close and close<(open[1] + ((close[1]-open[1])/2)) and close>open[1] and open>close[1]+0.5)
+
+// Color for bullish patterns 
+bullishColor = color.rgb(255, 255, 255) 
+
+
+// Color for bearish patterns 
+bearishColor = color.rgb(255, 255, 255) 
+
+
+
+// Set the body color for bullish patterns 
+
+barcolor(isBullishEngulfing(open, close, low, high) ? color.rgb(0, 102, 255) : na,title="Bullish-Engulfing") 
+barcolor(isHammer(open, close, low, high) ? (#f8f9f5) : na,title="Hammer") 
+barcolor(isBullishHarami(open, close, low, high) ? color.rgb(0, 93, 214) : na,title="Bullish-Harami") 
+barcolor(isPiercingPattern(open,close,low,high) ? #e90fed : na,title="Piercing-Pattern") 
+
+// Set the body color for bearish patterns 
+
+barcolor(isBearishEngulfing(open, close, low, high) ? color.rgb(255, 196, 0) : na,title="Bearish-Engulfing") 
+barcolor(isBearishHarami(open, close, low, high) ? color.rgb(244, 244, 97) : na,title="Bearish-Harami") 
+barcolor(isInvertedHammer(open, close, low, high) ? #fdfcfd : na,title="Inverted-Hammer") 
+barcolor(isDarkCloudCover(open,close,low,high) ? color.rgb(157, 19, 157) : na,title="Dark-Cloud-Cover") 
+
+
+
+
+// doTT = input.int(0, title="T's (0->no 1->yes)", minval=0, maxval=1)
+doTTTT = input.bool(false, title="Show (T's)")
+doTT = (doTTTT?1:0)
+// if user gives 0,don't display
+// if user gives 1,display
+
+displayTT = false
+if doTT==1
+    displayTT:=true
+
+
+
+
+
+
+// SMA wala Red-T & Green-TT 
+
+sma1 = ta.sma(close[1], 1) 
+sma22 = ta.sma(close[1], 22) 
+
+candleCrossG = ta.crossover(sma1, sma22) 
+
+closeBelowPH = high[1] > close  
+closeabovePH = high[1] < close  
+
+
+redT = candleCrossG and closeBelowPH  
+greenTT = candleCrossG and closeabovePH 
+
+plotshape(series=redT and displayTT, title="Red-T", color=color.red, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="T") 
+
+plotshape(series=greenTT and displayTT, title="Green-TT", color=color.green, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="TT")
+
+
+
+
+
+
+// SMA wala Green-T & Red-TT 
+
+candleCrossR = ta.crossunder(sma1, sma22) 
+
+closeAbovePL = low[1] < close  
+closeBelowPL = low[1] > close  
+
+greenT = candleCrossR and closeAbovePL  
+redTT = candleCrossR and closeBelowPL 
+
+
+plotshape(series=greenT and displayTT, title="Green-T", color=color.green, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="T") 
+
+plotshape(series=redTT and displayTT, title="Red-TT", color=color.red, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="TT") 
+
+
+
+
+
+
+
+
+// 22sma settings 
+
+
+// Calculate SMA 
+
+sma_22 = ta.sma(close, 22) 
+
+
+// Determine color based on market position relative to SMA 
+
+lineColor = close > sma_22 ? color.green : color.red 
+
+
+
+// Plot SMA with color change 
+
+plot(sma_22, color=lineColor, linewidth=1,title="sma_22") 
+
+
+
+
+
+
+
+
+// Calculate if the current bar is the start of a new day 
+
+ist_time = time + 19800000
+ist_day = dayofweek(ist_time)
+isNewDay = ist_day != ist_day[1]
+// isNewDay = dayofweek != dayofweek[1] 
+
+
+// Initialize variables to hold high and low of the current day 
+
+var float currentDayHigh = na 
+var float currentDayLow = na 
+
+
+
+// If it's a new day, update the current day's high and low 
+
+if isNewDay 
+    currentDayHigh := high
+    currentDayLow := low 
+else 
+    if high > currentDayHigh or na(currentDayHigh) 
+        currentDayHigh := high 
+
+    if low < currentDayLow or na(currentDayLow) 
+        currentDayLow := low 
+
+plot(currentDayHigh, title="currentDayHigh", color=color.black, linewidth=2)
+plot(currentDayLow, title="currentDayLow", color=color.rgb(56, 97, 210), linewidth=2)
+
+// Calculate previous day's high, low, close, and open 
+
+pdHigh = request.security(syminfo.tickerid, "D", high[1], lookahead=barmerge.lookahead_on) 
+
+pdLow = request.security(syminfo.tickerid, "D", low[1], lookahead=barmerge.lookahead_on) 
+
+pdClose = request.security(syminfo.tickerid, "D", close[1], lookahead=barmerge.lookahead_on) 
+
+pdOpen = request.security(syminfo.tickerid, "D", open[1], lookahead=barmerge.lookahead_on) 
+
+
+
+
+
+
+// Plotting the lines for Previous Day High/Low/Close/Open 
+
+plot(pdHigh, color=color.red, style=plot.style_circles, linewidth=1, title="Previous Day High") 
+
+plot(pdLow, color=color.green, style=plot.style_circles, linewidth=1, title="Previous Day Low") 
+
+plot(pdClose, color=color.blue, style=plot.style_circles, linewidth=1, title="Previous Day Close") 
+
+
+
+// Calculate the last day's high, low, and close 
+
+lastDayHigh = request.security(syminfo.tickerid, "D", high[1], lookahead=barmerge.lookahead_on) 
+
+lastDayLow = request.security(syminfo.tickerid, "D", low[1], lookahead=barmerge.lookahead_on) 
+
+lastDayClose = request.security(syminfo.tickerid, "D", close[1], lookahead=barmerge.lookahead_on) 
+
+
+
+
+// Calculate the high, low, and close for the last 3 days 
+
+last3DaysHigh = request.security(syminfo.tickerid, "D", high[2], lookahead=barmerge.lookahead_on) 
+
+last3DaysLow = request.security(syminfo.tickerid, "D", low[2], lookahead=barmerge.lookahead_on) 
+
+last3DaysClose = request.security(syminfo.tickerid, "D", close[2], lookahead=barmerge.lookahead_on) 
+
+
+
+
+// Check if the current high is not equal to the last day's high 
+
+var float extendedHigh = na 
+
+if (high != lastDayHigh) 
+    extendedHigh := lastDayHigh 
+
+
+
+// Check if the current low is not equal to the last day's low 
+
+var float extendedLow = na 
+
+if (low != lastDayLow) 
+    extendedLow := lastDayLow 
+
+
+
+
+// Check if the current close is not equal to the last day's close 
+
+var float extendedClose = na 
+
+if (close != lastDayClose) 
+    extendedClose := lastDayClose 
+
+
+// Plotting the results as circles 
+
+// plot(extendedHigh, color=color.green, style=plot.style_circles, linewidth=1, title="Untouched High") 
+
+// plot(extendedLow, color=color.red, style=plot.style_circles, linewidth=1, title="Untouched Low") 
+
+// plot(extendedClose, color=color.blue, style=plot.style_circles, linewidth=1, title="Untouched Close")
+
+
+
+
+//market gap up and gap down logics with first 2 candles of the day
+
+
+greenT := false
+redT := false
+
+//market opens gap up
+
+if (dayofweek != dayofweek[2] and dayofweek == dayofweek[1]) and (close[2] < open[1])
+    if (close > high[1])
+        greenT := true
+
+    if (close<=high[1] and close>=low[1]) and (open<=high[1] and open>=low[1])
+        redT := true
+
+plotshape(series=greenT and displayTT, title="Green-T-dayopen", color=color.green, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="T")
+
+plotshape(series=redT and displayTT, title="Red-T-dayopen", color=color.red, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="T") 
+
+
+
+
+greenT := false
+redT := false
+
+//market opens gap down
+
+if (dayofweek != dayofweek[2] and dayofweek == dayofweek[1]) and (open[1] < close[2])
+    if (close[1]<open[1]) and (close<low[1])
+        redT := true
+    
+    if (close[1]<open[1]) and (close>low[1])
+        greenT := true
+
+plotshape(series=greenT and displayTT, title="Green-T-dayopen", color=color.green, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="T") 
+
+plotshape(series=redT and displayTT, title="Red-T-dayopen", color=color.red, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="T")
+
+
+
+// --------------------common area for switching bw indicator 1 and 2----------------------------
+
+showIndicator1 = input.bool(true,title="indicator-1")
+showIndicator2 = input.bool(false,title="indicator-2")
+
+// --------------------common area ends----------------------------------------------------------
+
+
+
+
+
+//--------------------------------------------- for indicator 1---------------------------------------------------
+
+
+// some universal variables
+
+jodaHigh1 = 1.1
+jodaLow1 = 1.1
+var downSlTriggerLine1 = 1.1
+var upSlTriggerLine1 = 1.1
+
+
+// target array 
+
+var udaoTarget1 = 1.1
+var giraoTarget1 = 1.1
+
+
+
+targetAchieved = false
+if high >= udaoTarget1
+    targetAchieved := true
+    udaoTarget1 := 100000.0
+plotshape(series=targetAchieved and showIndicator1, title="target-for-udaao(1)", color=#7e77caac, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="Target")
+
+
+targetAchieved := false
+if low < giraoTarget1
+    targetAchieved := true
+    giraoTarget1 := 0.1
+plotshape(series=targetAchieved and showIndicator1, title="target-for-giraao(1)", color=#7e77caac, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="Target")
+
+
+// apna corrected currentDayHigh
+
+var apnaCurrentDayHigh = currentDayHigh
+apnaCurrentDayHigh := currentDayHigh > pdHigh ? currentDayHigh : pdHigh
+
+
+
+
+
+
+// Giving green B and red S signals logics universal variables
+
+
+greenB1 = false
+redS1 = false
+
+
+
+
+// ask users whether to give S or B signals
+
+// doSB = input.int(0, title="S and B (0->no 1->yes)", minval=0, maxval=1)
+doSBBB1 = input.bool(false,title="show (S & B)(indicator-1)")
+doSB1 = (doSBBB1?1:0)
+// if user gives 0,don't display
+// if user gives 1,display
+
+
+
+
+
+
+displaySB1 = false
+if doSB1==1
+    displaySB1 := true
+
+
+
+
+
+
+// universal variables for up and down logics
+
+var isUpActive1 = false
+var canUpForm1 = false
+var upBreakLine1 = 1.1
+
+var isDownActive1 = false
+var canDownForm1 = false
+var downBreakLine1 = 1.1
+
+
+
+
+
+plotUp = false
+if not(isUpActive1) and canUpForm1
+    if high > upBreakLine1
+        isUpActive1 := true
+        isDownActive1 := false
+
+        plotUp := true
+        canUpForm1 := false 
+        
+        udaoTarget1 := pdHigh
+        // array.set(targetArrayUdao,ng,pdHigh)
+        // label.new(bar_index, low+10, text="उड़ाओ", style=label.style_text_outline, yloc=yloc.belowbar, color=color.white, textcolor=color.black)
+
+// plotarrow(series=plotUp?1:na, title="UP Arrow", colorup=color.black, offset=-1,minheight=15,maxheight = 15)
+plotshape(plotUp and showIndicator1?upBreakLine1:na, style=shape.xcross,location=location.absolute, color=color.rgb(21, 21, 3),title="udaao-point(1)")
+plotshape(series=plotUp and showIndicator1, title="udaao(1)", color=color.rgb(45, 226, 87, 43), style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.black, text="उड़ाओ")
+
+
+plotDown = false
+if not(isDownActive1) and canDownForm1
+    if low < downBreakLine1
+        isDownActive1 := true
+        isUpActive1 := false
+
+        plotDown := true
+        canDownForm1 := false
+        // array.push(targetArrayGirao,pdLow)
+        giraoTarget1 := pdLow
+        // label.new(bar_index, high+10, text="गिराओ", style=label.style_text_outline, yloc=yloc.abovebar, color=color.white, textcolor=color.black)
+
+// plotarrow(series=plotDown?-1:na, title="DOWN Arrow", colordown=color.black, offset=-1,minheight=15,maxheight = 15)
+plotshape(plotDown and showIndicator1?downBreakLine1:na, style=shape.xcross,location=location.absolute, color=color.rgb(21, 21, 5),title="girao-point(1)")
+plotshape(series=plotDown and showIndicator1, title="giraao(1)", color=color.rgb(219, 31, 31, 39), style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.black, text="गिराओ")
+
+
+// STOPLOSSES AFTER BUY OR SELL 
+
+giveSl = false
+
+
+
+// SL after down (girao)
+
+giveSl := false
+if isDownActive1
+    if high > downSlTriggerLine1
+        giveSl := true
+        isUpActive1 := true
+        isDownActive1 := false
+
+        giraoTarget1 := 0.1
+        
+plotshape(series=giveSl and showIndicator1, title="SL-for-girao(1)", color=#9b27b034, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="SL")
+
+
+
+// SL after up (uthao/udaao)
+
+giveSl := false
+if isUpActive1
+    if low < upSlTriggerLine1
+        giveSl := true
+        isUpActive1 := false
+        isDownActive1 := true
+        
+        udaoTarget1 := 100000.0
+
+plotshape(series=giveSl and showIndicator1, title="SL-for-udaao(1)", color=#9b27b034, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="SL")
+
+
+
+
+// plot(upBreakLine1, title="Up Break Line", color=color.green, linewidth=2)
+// plot(downBreakLine1, title="Down Break Line", color=color.red, linewidth=2)
+// plot(upSlTriggerLine1, title="Down Break Line", color=color.blue, linewidth=2)
+// plot(downSlTriggerLine1, title="Down Break Line", color=color.black, linewidth=2) 
+
+
+
+
+
+
+// UP logics
+
+
+//if not(canUpForm1) and not(isUpActive1)
+if not(isUpActive1)
+    if isBullishEngulfing(open, close, low, high)
+        jodaHigh1 := high[1] > high ? high[1]: high
+        jodaLow1 := low[1] < low ? low[1] : low
+
+        if (jodaHigh1>=pdLow)and(jodaLow1<=pdLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=currentDayLow)and(jodaLow1<=currentDayLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+
+    if isPiercingPattern(open, close, low, high)
+        jodaHigh1 := high[1] > high ? high[1]: high
+        jodaLow1 := low[1] < low ? low[1] : low
+
+        if (jodaHigh1>=pdLow)and(jodaLow1<=pdLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=currentDayLow)and(jodaLow1<=currentDayLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+
+    if isBullishHarami(open, close, low, high)
+        jodaHigh1 := high[1] > high ? high[1]: high
+        jodaLow1 := low[1] < low ? low[1] : low
+
+        if (jodaHigh1>=pdLow)and(jodaLow1<=pdLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=currentDayLow)and(jodaLow1<=currentDayLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+
+    if isHammer(open, close, low, high)
+        jodaHigh1 := high
+        jodaLow1 := low
+
+        if (jodaHigh1>=pdLow)and(jodaLow1<=pdLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+        if (jodaHigh1>=currentDayLow)and(jodaLow1<=currentDayLow)
+            canUpForm1 := true
+            upBreakLine1 := jodaHigh1
+            upSlTriggerLine1 := jodaLow1-15.0
+            greenB1 := true
+
+
+
+
+
+// DOWN logics
+
+//if not(canDownForm1) and not(isDownActive1)
+if not(isDownActive1)
+    if isBearishEngulfing(open, close, low, high)
+        jodaHigh1 := high[1] > high ? high[1]: high
+        jodaLow1 := low[1] < low ? low[1] : low
+
+        if (jodaHigh1>=pdHigh)and(jodaLow1<=pdHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+        if (jodaHigh1>=apnaCurrentDayHigh)and(jodaLow1<=apnaCurrentDayHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+
+
+    if isBearishHarami(open, close, low, high)
+        jodaHigh1 := high[1] > high ? high[1]: high
+        jodaLow1 := low[1] < low ? low[1] : low
+
+        if (jodaHigh1>=pdHigh)and(jodaLow1<=pdHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+
+        if (jodaHigh1>=apnaCurrentDayHigh)and(jodaLow1<=apnaCurrentDayHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+
+    if isInvertedHammer(open, close, low, high)
+        jodaHigh1 := high
+        jodaLow1 := low
+
+        if (jodaHigh1>=pdHigh)and(jodaLow1<=pdHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+        if (jodaHigh1>=apnaCurrentDayHigh)and(jodaLow1<=apnaCurrentDayHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+    if isDarkCloudCover(open, close, low, high)
+        jodaHigh1 := high[1] > high ? high[1]: high
+        jodaLow1 := low[1] < low ? low[1] : low
+
+        if (jodaHigh1>=pdHigh)and(jodaLow1<=pdHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+        if (jodaHigh1>=pdClose)and(jodaLow1<=pdClose)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+        if (jodaHigh1>=apnaCurrentDayHigh)and(jodaLow1<=apnaCurrentDayHigh)
+            canDownForm1 := true
+            downBreakLine1 := jodaLow1
+            downSlTriggerLine1 := jodaHigh1+15.0
+            redS1 := true
+
+
+
+
+// //add "buy_time_exit" text on 3pm candle
+
+
+// // Define the target time (3 PM IST)
+// targetHour = 15 // 3 PM in 24-hour format
+// targetMinute = 0 // 0 minutes
+
+// // Get the current candle's time
+// candleTime = time
+
+// // Convert the candle's time to the local timezone (IST)
+// candleHour = hour(candleTime + 5 * 3600) // Adding 5 hours for IST
+// candleMinute = minute(candleTime + 5 * 3600)
+
+// // Check if the current candle's hour and minute match the target time
+// isTargetTime = (candleHour == targetHour) and (candleMinute == targetMinute)
+
+// // Display text on the candle if it's 3 PM IST
+// if isTargetTime
+//     label.new(bar_index, high+10, "buy_time_exit", style = label.style_text_outline, color=color.white, textcolor=color.black)
+// plotarrow(series=isTargetTime?-1:na, title="DOWN Arrow", colordown=color.black, offset=-1,minheight=15,maxheight = 15)
+
+
+
+
+
+
+
+
+
+
+// Giving green B signals logics
+
+plotshape(series=(greenB1 and displaySB1 and showIndicator1), title="Green-B(1)", color=color.green, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="B")
+
+
+// Giving red S signals logics
+
+plotshape(series=(redS1 and displaySB1 and showIndicator1), title="Red-S(1)", color=color.red, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="S")
+
+
+//--------------------------------------------- indicator 1 ends---------------------------------------------------
+
+
+
+
+//--------------------------------------------- indicator 2 starts---------------------------------------------------
+
+// some universal variables
+
+jodaHigh2 = 1.1
+jodaLow2 = 1.1
+var downSlTriggerLine2 = 1.1
+var upSlTriggerLine2 = 1.1
+
+
+
+
+
+// ask users whether to give S or B signals
+
+doSBBB2 = input.bool(false,title="show (S & B)(indicator-2)")
+doSB2 = (doSBBB2?1:0)
+// if user gives 0,don't display
+// if user gives 1,display
+
+displaySB2 = false
+if doSB2==1
+    displaySB2 := true
+
+
+
+// Giving green B signals logics
+
+greenB2 = false
+
+if (isBullishEngulfing(open, close, low, high))or(isHammer(open, close, low, high))or(isBullishHarami(open, close, low, high))
+    greenB2 := true
+
+plotshape(series=(greenB2 and displaySB2 and showIndicator2), title="Green-B(2)", color=color.green, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="B")
+
+
+
+
+
+
+// Giving red S signals logics
+
+redS2 = false
+
+if (isBearishEngulfing(open, close, low, high))or(isInvertedHammer(open, close, low, high))or(isBearishHarami(open, close, low, high))
+    redS2 := true
+
+plotshape(series=(redS2 and displaySB2 and showIndicator2), title="Red-S(2)", color=color.red, style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.white, text="S")
+
+
+// universal variables for up and down logics
+
+var isUpActive2 = false
+var canUpForm2 = false
+var upBreakLine2 = 1.1
+
+var isDownActive2 = false
+var canDownForm2 = false
+var downBreakLine2 = 1.1
+
+
+plotUp := false
+if not(isUpActive2) and canUpForm2
+    if high > upBreakLine2
+        isUpActive2 := true
+        isDownActive2 := false
+
+        plotUp := true
+        canUpForm2 := false
+        // label.new(bar_index, low+10, text="उड़ाओ", style=label.style_text_outline, yloc=yloc.belowbar, color=color.white, textcolor=color.black)
+
+// plotarrow(series=plotUp?1:na, title="UP Arrow", colorup=color.black, offset=-1,minheight=15,maxheight = 15)
+plotshape(plotUp and showIndicator2?upBreakLine2:na, style=shape.xcross,location=location.absolute, color=color.rgb(21, 21, 3),title="udaao-point(2)")
+plotshape(series=plotUp and showIndicator2, title="udaao(2)", color=color.rgb(7, 236, 49, 85), style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.black, text="उड़ाओ")
+
+
+
+plotDown := false
+if not(isDownActive2) and canDownForm2
+    if low < downBreakLine2
+        isDownActive2 := true
+        isUpActive2 := false
+
+        plotDown := true
+        canDownForm2 := false
+        // label.new(bar_index, high+10, text="गिराओ", style=label.style_text_outline, yloc=yloc.abovebar, color=color.white, textcolor=color.black)
+
+// plotarrow(series=plotDown?-1:na, title="DOWN Arrow", colordown=color.black, offset=-1,minheight=15,maxheight = 15)
+plotshape(plotDown and showIndicator2?downBreakLine2:na, style=shape.xcross,location=location.absolute, color=color.rgb(21, 21, 5),title="girao-point(2)")
+plotshape(series=plotDown and showIndicator2, title="giraao(2)", color=color.rgb(242, 40, 14, 81), style=shape.labeldown, location=location.abovebar, size=size.small, textcolor = color.black, text="गिराओ")
+
+
+
+
+
+
+
+
+
+// STOPLOSSES AFTER BUY OR SELL 
+
+giveSl := false
+
+
+
+// SL after down (girao)
+
+giveSl := false
+if isDownActive2
+    if high > downSlTriggerLine2
+        giveSl := true
+        // isUpActive2 := true
+        isDownActive2 := false
+plotshape(series=giveSl and showIndicator2, title="SL-girao(2)", color=color.purple, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="SL")
+
+
+
+// SL after up (uthao)
+
+giveSl := false
+if isUpActive2
+    if low < upSlTriggerLine2
+        giveSl := true
+        isUpActive2 := false
+        // isDownActive2 := true
+plotshape(series=giveSl and showIndicator2, title="SL-udaao(2)", color=color.purple, style=shape.labelup, location=location.belowbar, size=size.small, textcolor = color.white, text="SL")
+
+
+
+
+// UP logics
+
+
+//if not(canUpForm2) and not(isUpActive2)
+if not(isUpActive2)
+    if isBullishEngulfing(open, close, low, high)
+        jodaHigh2 := high[1] > high ? high[1]: high
+        jodaLow2 := low[1] < low ? low[1] : low
+
+        if (jodaHigh2>=pdLow)and(jodaLow2<=pdLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=currentDayLow)and(jodaLow2<=currentDayLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+
+    if isPiercingPattern(open, close, low, high)
+        jodaHigh2 := high[1] > high ? high[1]: high
+        jodaLow2 := low[1] < low ? low[1] : low
+
+        if (jodaHigh2>=pdLow)and(jodaLow2<=pdLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=currentDayLow)and(jodaLow2<=currentDayLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+
+    if isBullishHarami(open, close, low, high)
+        jodaHigh2 := high[1] > high ? high[1]: high
+        jodaLow2 := low[1] < low ? low[1] : low
+
+        if (jodaHigh2>=pdLow)and(jodaLow2<=pdLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=currentDayLow)and(jodaLow2<=currentDayLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+
+    if isHammer(open, close, low, high)
+        jodaHigh2 := high
+        jodaLow2 := low
+
+        if (jodaHigh2>=pdLow)and(jodaLow2<=pdLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+        if (jodaHigh2>=currentDayLow)and(jodaLow2<=currentDayLow)
+            canUpForm2 := true
+            upBreakLine2 := jodaHigh2
+            upSlTriggerLine2 := jodaLow2
+
+
+
+
+
+// DOWN logics
+
+//if not(canDownForm2) and not(isDownActive2)
+if not(isDownActive2)
+    if isBearishEngulfing(open, close, low, high)
+        jodaHigh2 := high[1] > high ? high[1]: high
+        jodaLow2 := low[1] < low ? low[1] : low
+
+        if (jodaHigh2>=pdHigh)and(jodaLow2<=pdHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=currentDayHigh)and(jodaLow2<=currentDayHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+
+    if isDarkCloudCover(open, close, low, high)
+        jodaHigh2 := high[1] > high ? high[1]: high
+        jodaLow2 := low[1] < low ? low[1] : low
+
+        if (jodaHigh2>=pdHigh)and(jodaLow2<=pdHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=currentDayHigh)and(jodaLow2<=currentDayHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+
+    if isBearishHarami(open, close, low, high)
+        jodaHigh2 := high[1] > high ? high[1]: high
+        jodaLow2 := low[1] < low ? low[1] : low
+
+        if (jodaHigh2>=pdHigh)and(jodaLow2<=pdHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=currentDayHigh)and(jodaLow2<=currentDayHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+
+    if isInvertedHammer(open, close, low, high)
+        jodaHigh2 := high
+        jodaLow2 := low
+
+        if (jodaHigh2>=pdHigh)and(jodaLow2<=pdHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=pdClose)and(jodaLow2<=pdClose)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+        if (jodaHigh2>=currentDayHigh)and(jodaLow2<=currentDayHigh)
+            canDownForm2 := true
+            downBreakLine2 := jodaLow2
+            downSlTriggerLine2 := jodaHigh2
+
+
+
+
+
+// //add "buy_time_exit" text on 3pm candle
+
+
+// // Define the target time (3 PM IST)
+// targetHour = 15 // 3 PM in 24-hour format
+// targetMinute = 0 // 0 minutes
+
+// // Get the current candle's time
+// candleTime = time
+
+// // Convert the candle's time to the local timezone (IST)
+// candleHour = hour(candleTime + 5 * 3600) // Adding 5 hours for IST
+// candleMinute = minute(candleTime + 5 * 3600)
+
+// // Check if the current candle's hour and minute match the target time
+// isTargetTime = (candleHour == targetHour) and (candleMinute == targetMinute)
+
+// // Display text on the candle if it's 3 PM IST
+// if isTargetTime
+//     label.new(bar_index, high+10, "buy_time_exit", style = label.style_text_outline, color=color.white, textcolor=color.black)
+// plotarrow(series=isTargetTime?-1:na, title="DOWN Arrow", colordown=color.black, offset=-1,minheight=15,maxheight = 15)
+
+
+
+
+
+
+
+
+// plot(upBreakLine2, title="Up Break Line", color=color.green, linewidth=2)
+// plot(downBreakLine2, title="Down Break Line", color=color.red, linewidth=2)
+// plot(upSlTriggerLine2, title="Down Break Line", color=color.blue, linewidth=2)
+// plot(downSlTriggerLine2, title="Down Break Line", color=color.black, linewidth=2)
+
+
+
+
+
+//--------------------------------------------- indicator ends---------------------------------------------------
