@@ -1,6 +1,6 @@
 # 📈 Multi-Pattern Candlestick-Based Buy/Sell Signal Indicator for TradingView
 
-This TradingView Pine Script project provides a robust **multi-pattern candlestick indicator** that dynamically identifies potential **buy/sell signals**, **entry breakout points**, and **stop-loss triggers** based on well-known candlestick reversal patterns. It features two independent signal systems with clear visual cues (including custom Hindi tags like _"उड़ाओ"_ and _"गिराओ"_ for intuitive trade triggers).
+This TradingView Pine Script project provides a robust **multi-pattern candlestick indicator** that dynamically identifies potential **buy/sell signals**, **entry breakout points**, and **stop-loss triggers** based on well-known candlestick reversal patterns. It features two independent signal systems with clear visual cues (including custom labels like _"Buy"_ and _"Sell"_ for intuitive trade triggers).
 
 ---
 
@@ -19,7 +19,7 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 
 - 🟢🔴 **Signal Visuals**:
   - 'B' for bullish entries, 'S' for bearish entries.
-  - "उड़ाओ" (Fly/Buy) and "गिराओ" (Drop/Sell) labels on breakout confirmation.
+  - "Buy" and "Sell" labels on breakout confirmation.
   - 'SL' label marks stop-loss triggers visually.
 
 - ⏰ **3 PM Exit Marker (Optional)**:
@@ -33,12 +33,12 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 
 - **Up Move Logic** (Buy):
   - Pattern like Bullish Engulfing forms near PD Low/Close or Current Day Low.
-  - Breaks above pattern high triggers `"उड़ाओ"` label and long bias.
+  - Breaks above pattern high triggers `"Buy"` label and long bias.
   - Stop-loss placed slightly below pattern low.
 
 - **Down Move Logic** (Sell):
   - Pattern like Bearish Engulfing forms near PD High/Close or Current Day High.
-  - Breaks below pattern low triggers `"गिराओ"` label and short bias.
+  - Breaks below pattern low triggers `"Sell"` label and short bias.
   - Stop-loss placed slightly above pattern high.
 
 ### Dual Indicator Mode
@@ -68,10 +68,10 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 
 ## 💡 Use Cases
 
-- Short-term intraday signal confirmation
-- Educational tool for learning price action-based reversals
-- Visual aid for support/resistance breakout traders
-- Resume/portfolio showcase for Pine Script skill
+- Short-term intraday signal confirmation  
+- Educational tool for learning price action-based reversals  
+- Visual aid for support/resistance breakout traders  
+- Resume/portfolio showcase for Pine Script skill  
 
 ---
 
@@ -80,13 +80,13 @@ This TradingView Pine Script project provides a robust **multi-pattern candlesti
 **Avin Chaudhary**  
 3rd Year Tech Enthusiast | Frontend Developer  
 National Institute of Technology, Kurukshetra (IT '27)  
-🔗 [LinkedIn](https://www.linkedin.com/in/avin-chaudhary/) | [GitHub](https://github.com/Avin-Chaudhary)
+🔗 [LinkedIn](https://www.linkedin.com/in/avin-chaudhary-728a992aa?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app) | [GitHub](https://github.com/Avin-Chaudhary)
 
 ---
 
-## 📄 License
+## ⚠️ Disclaimer
 
-This project is open-source and free to use under the MIT License.
+This script is shared **strictly for personal learning and resume demonstration purposes**.  
+Do **not** copy, reuse, or distribute without explicit permission.
 
 ---
-
